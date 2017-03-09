@@ -21,6 +21,7 @@ from settings import api_key, latitude, longitude
 base_url = 'https://api.darksky.net/forecast/{}/{},{}'
 normal_output_str = 'There will be rain at {}, the forecast is showing {}'
 rain_now_output_str = 'It\'s raining now!  The forecast is showing {}'
+no_rain_output_str = 'No rain forecast for the next week.'
 precip_threshold = 0.3
 
 time_fmt = OrderedDict()
@@ -58,6 +59,9 @@ def get_rain_forecast(forecast):
 
 
 def format_output(rain_next, period):
+    if not rain_next:
+        return no_rain_output_str
+
     rain_time = convert_time(rain_next['time'])
     rain_forecast = get_rain_forecast(rain_next)
     delta = (rain_time - datetime.now()).total_seconds()
@@ -66,6 +70,10 @@ def format_output(rain_next, period):
         return rain_now_output_str.format(rain_forecast)
 
     rain_time_str = rain_time.strftime(time_fmt[period])
+
+    if period == 'daily':
+        output_str = normal_output_str.replace('at', 'on')
+        return output_str.format(rain_time_str, rain_forecast)
     return normal_output_str.format(rain_time_str, rain_forecast)
 
 
